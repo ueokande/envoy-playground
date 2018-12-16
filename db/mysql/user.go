@@ -11,9 +11,9 @@ func (i *impl) AddUser(ctx context.Context, u core.User) error {
 	return err
 }
 
-func (i *impl) GetUser(ctx context.Context, id int64) (*core.User, error) {
+func (i *impl) GetUser(ctx context.Context, login string) (*core.User, error) {
 	var u core.User
-	err := i.db.QueryRow(`SELECT id,login,name,created_at,updated_at FROM user WHERE id=?`, id).
+	err := i.db.QueryRow(`SELECT id,login,name,created_at,updated_at FROM user WHERE login=?`, login).
 		Scan(&(u.ID), &(u.Login), &(u.Name), &(u.CreatedAt), &(u.UpdatedAt))
 	if err != nil {
 		return nil, err
@@ -40,11 +40,11 @@ func (i *impl) ListUsers(ctx context.Context) ([]*core.User, error) {
 }
 
 func (i *impl) UpdateUser(ctx context.Context, u core.User) error {
-	_, err := i.db.Exec(`UPDATE user SET login=?, name=?, updated_at=NOW() WHERE id=?`, u.Login, u.Name, u.ID)
+	_, err := i.db.Exec(`UPDATE user SET login=?, name=?, updated_at=NOW() WHERE login=?`, u.Login, u.Name, u.Login)
 	return err
 }
 
-func (i *impl) RemoveUser(ctx context.Context, id int64) error {
-	_, err := i.db.Exec(`DELETE FROM user WHERE id=?`, id)
+func (i *impl) RemoveUser(ctx context.Context, login string) error {
+	_, err := i.db.Exec(`DELETE FROM user WHERE Login=?`, login)
 	return err
 }

@@ -38,14 +38,14 @@ func testUserCRUD(t *testing.T) {
 	sort.Slice(us, func(i, j int) bool { return us[i].Name < us[j].Name })
 
 	// Get
-	u, err := db.GetUser(ctx, us[0].ID)
+	u, err := db.GetUser(ctx, us[0].Login)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if u.Login != "alice" || u.Name != "Alice" {
 		t.Fatal("unexpected user", u)
 	}
-	u, err = db.GetUser(ctx, us[1].ID)
+	u, err = db.GetUser(ctx, us[1].Login)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func testUserCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	u, err = db.GetUser(ctx, us[1].ID)
+	u, err = db.GetUser(ctx, us[1].Login)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func testUserCRUD(t *testing.T) {
 	}
 
 	// Remove
-	err = db.RemoveUser(ctx, us[1].ID)
+	err = db.RemoveUser(ctx, us[1].Login)
 	if err != nil {
 		t.Fatal(err)
 	}
