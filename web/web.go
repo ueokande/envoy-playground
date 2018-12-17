@@ -28,8 +28,9 @@ func (i *impl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		i.handleUserUpdate(w, r)
 	case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/user/"):
 		i.handleUserDelete(w, r)
+	default:
+		i.renderMessage(w, 404, "path not found")
 	}
-	i.renderMessage(w, 404, "path not found")
 }
 
 func (i *impl) renderJson(w http.ResponseWriter, data interface{}) {
