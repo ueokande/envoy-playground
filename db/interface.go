@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 
 	core "github.com/ueokande/envoy-playground"
 )
@@ -19,3 +20,8 @@ type Interface interface {
 
 	Close() error
 }
+
+var (
+	ErrNotFound = errors.New("not found")
+	ErrConflict = errors.New("conflict")
+)

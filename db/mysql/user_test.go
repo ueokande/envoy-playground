@@ -2,88 +2,180 @@ package mysql
 
 import (
 	"context"
-	"sort"
 	"testing"
 
 	core "github.com/ueokande/envoy-playground"
+	"github.com/ueokande/envoy-playground/db"
 )
 
-func testUserCRUD(t *testing.T) {
+func testAddUser(t *testing.T) {
 	ctx := context.Background()
 
-	db, err := New(conf)
+	d, err := New(conf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.Close()
+	defer d.Close()
 
-	// Add
-	err = db.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
+	err = d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = db.AddUser(ctx, core.User{Login: "bob", Name: "Bob"})
+	err = d.AddUser(ctx, core.User{Login: "bob", Name: "Bob"})
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	// List
-	us, err := db.ListUsers(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(us) != 2 {
-		t.Fatal(`len(us) != 2`, len(us))
-	}
-	sort.Slice(us, func(i, j int) bool { return us[i].Name < us[j].Name })
-
-	// Get
-	u, err := db.GetUser(ctx, us[0].Login)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if u.Login != "alice" || u.Name != "Alice" {
-		t.Fatal("unexpected user", u)
-	}
-	u, err = db.GetUser(ctx, us[1].Login)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if u.Login != "bob" || u.Name != "Bob" {
-		t.Fatal("unexpected user", u)
 	}
 
-	// Update
-	us[1].Name = "Bobby"
-	err = db.UpdateUser(ctx, *us[1])
+	err = d.AddUser(ctx, core.User{Login: "alice", Name: "Alice2"})
+	if err != db.ErrConflict {
+		t.Fatal(err)
+	}
+	err = d.AddUser(ctx, core.User{Login: "ALICE", Name: "Alice3"})
+	if err != db.ErrConflict {
+		t.Fatal(err)
+	}
+}
+
+func testGetUser(t *testing.T) {
+	ctx := context.Background()
+
+	d, err := New(conf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	u, err = db.GetUser(ctx, us[1].Login)
+	defer d.Close()
+
+	err = d.AddUser(ctx, core.User{Login: "carol", Name: "Carol"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if u.Login != "bob" || u.Name != "Bobby" {
+
+	u, err := d.GetUser(ctx, "carol")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Login != "carol" || u.Name != "Carol" {
 		t.Fatal("unexpected user", u)
 	}
 
-	// Remove
-	err = db.RemoveUser(ctx, us[1].Login)
+	u, err = d.GetUser(ctx, "ghost")
+	if err != db.ErrNotFound {
+		t.Fatal(err)
+	}
+}
+
+func testListUser(t *testing.T) {
+	ctx := context.Background()
+
+	d, err := New(conf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	us, err = db.ListUsers(ctx)
+	defer d.Close()
+
+	err = d.AddUser(ctx, core.User{Login: "dan", Name: "Dan"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(us) != 1 {
-		t.Fatal(`len(us) != 2`, len(us))
+	err = d.AddUser(ctx, core.User{Login: "erin", Name: "Erin"})
+	if err != nil {
+		t.Fatal(err)
 	}
-	if us[0].Login != "alice" || us[0].Name != "Alice" {
-		t.Fatal("unexpected user", us[0])
+
+	us, err := d.ListUsers(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+	for _, u := range us {
+		if u.Login == "dan" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("dan not found")
+	}
+	found = false
+	for _, u := range us {
+		if u.Login == "erin" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("erin not found")
+	}
+}
+
+func testUpdateUser(t *testing.T) {
+	ctx := context.Background()
+
+	d, err := New(conf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+
+	err = d.AddUser(ctx, core.User{Login: "faythe", Name: "Faythe"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	u, err := d.GetUser(ctx, "faythe")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	u.Name = "Faythe's mom"
+	err = d.UpdateUser(ctx, *u)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	u, err = d.GetUser(ctx, "faythe")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if u.Name != "Faythe's mom" {
+		t.Error(`u.Name != "Faythe's mom"`, u.Name)
+	}
+}
+
+func testRemoveUser(t *testing.T) {
+	ctx := context.Background()
+
+	d, err := New(conf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+
+	err = d.AddUser(ctx, core.User{Login: "Grace", Name: "grace"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = d.RemoveUser(ctx, "grace")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = d.GetUser(ctx, "grace")
+	if err != db.ErrNotFound {
+		t.Fatal(err)
+	}
+	err = d.RemoveUser(ctx, "grace")
+	if err != db.ErrNotFound {
+		t.Fatal(err)
 	}
 }
 
 func TestUser(t *testing.T) {
-	t.Run("CRUD", testUserCRUD)
+	t.Run("AddUser", testAddUser)
+	t.Run("GetUser", testGetUser)
+	t.Run("ListUsers", testListUser)
+	t.Run("UpdateUser", testUpdateUser)
+	t.Run("RemoveUser", testRemoveUser)
 }

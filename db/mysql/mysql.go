@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/ueokande/envoy-playground/db"
 )
 
@@ -31,4 +31,16 @@ type impl struct {
 
 func (i *impl) Close() error {
 	return i.db.Close()
+}
+
+func isNotFound(err error) bool {
+	return err == sql.ErrNoRows
+}
+
+func isConflict(err error) bool {
+	mysqlErr, ok := err.(*mysql.MySQLError)
+	if !ok {
+		return false
+	}
+	return mysqlErr.Number == 1062
 }
