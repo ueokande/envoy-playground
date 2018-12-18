@@ -8,14 +8,15 @@ import (
 	"github.com/ueokande/envoy-playground/db"
 )
 
-func testAddUser(t *testing.T) {
+func TestAddUser(t *testing.T) {
 	ctx := context.Background()
 
-	d, err := New(conf)
+	sql, err := newDB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer d.Close()
+	defer sql.Close()
+	d := New(sql)
 
 	err = d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
 	if err != nil {
@@ -36,14 +37,15 @@ func testAddUser(t *testing.T) {
 	}
 }
 
-func testGetUser(t *testing.T) {
+func TestGetUser(t *testing.T) {
 	ctx := context.Background()
 
-	d, err := New(conf)
+	sql, err := newDB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer d.Close()
+	defer sql.Close()
+	d := New(sql)
 
 	err = d.AddUser(ctx, core.User{Login: "carol", Name: "Carol"})
 	if err != nil {
@@ -64,14 +66,15 @@ func testGetUser(t *testing.T) {
 	}
 }
 
-func testListUser(t *testing.T) {
+func TestListUser(t *testing.T) {
 	ctx := context.Background()
 
-	d, err := New(conf)
+	sql, err := newDB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer d.Close()
+	defer sql.Close()
+	d := New(sql)
 
 	err = d.AddUser(ctx, core.User{Login: "dan", Name: "Dan"})
 	if err != nil {
@@ -109,14 +112,15 @@ func testListUser(t *testing.T) {
 	}
 }
 
-func testUpdateUser(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 	ctx := context.Background()
 
-	d, err := New(conf)
+	sql, err := newDB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer d.Close()
+	defer sql.Close()
+	d := New(sql)
 
 	err = d.AddUser(ctx, core.User{Login: "faythe", Name: "Faythe"})
 	if err != nil {
@@ -144,14 +148,15 @@ func testUpdateUser(t *testing.T) {
 	}
 }
 
-func testRemoveUser(t *testing.T) {
+func TestRemoveUser(t *testing.T) {
 	ctx := context.Background()
 
-	d, err := New(conf)
+	sql, err := newDB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer d.Close()
+	defer sql.Close()
+	d := New(sql)
 
 	err = d.AddUser(ctx, core.User{Login: "Grace", Name: "grace"})
 	if err != nil {
@@ -170,12 +175,4 @@ func testRemoveUser(t *testing.T) {
 	if err != db.ErrNotFound {
 		t.Fatal(err)
 	}
-}
-
-func TestUser(t *testing.T) {
-	t.Run("AddUser", testAddUser)
-	t.Run("GetUser", testGetUser)
-	t.Run("ListUsers", testListUser)
-	t.Run("UpdateUser", testUpdateUser)
-	t.Run("RemoveUser", testRemoveUser)
 }

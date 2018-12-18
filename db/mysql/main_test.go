@@ -1,40 +1,60 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"strconv"
 	"testing"
 )
 
-var conf = Conf{
-	Address:  "127.0.0.1",
-	Port:     3306,
-	User:     "root",
-	Password: "",
-	Database: "test",
-}
+func newDB() (*sql.DB, error) {
+	address := "127.0.0.1"
+	port := 3306
+	user := "root"
+	password := ""
+	database := "test"
 
-func TestMain(m *testing.M) {
 	if val := os.Getenv("MYSQL_ADDR"); len(val) > 0 {
-		conf.Address = val
+		address = val
 	}
 	if val := os.Getenv("MYSQL_PORT"); len(val) > 0 {
-		port, err := strconv.Atoi(val)
+		var err error
+		port, err = strconv.Atoi(val)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		conf.Port = port
 	}
 	if val := os.Getenv("MYSQL_USER"); len(val) > 0 {
-		conf.User = val
+		user = val
 	}
 	if val := os.Getenv("MYSQL_PASSWORD"); len(val) > 0 {
-		conf.Password = val
+		password = val
 	}
 	if val := os.Getenv("MYSQL_DATABASE"); len(val) > 0 {
-		conf.Database = val
+		database = val
+	}
+
+	src := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		user, password, address, port, database)
+	return sql.Open("mysql", src)
+}
+
+func initDB() error {
+	db, err := newDB()
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(`TRUNCATE user`)
+	return err
+}
+
+func TestMain(m *testing.M) {
+	err := initDB()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	os.Exit(m.Run())

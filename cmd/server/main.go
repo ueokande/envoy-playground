@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -19,42 +19,27 @@ var (
 	flgMySQLPort     = flag.Int("mysql-port", 3306, "MySQL port")
 	flgMySQLDatabase = flag.String("mysql-database", "envoy-playground", "MySQL database name")
 
-	mySQLUser     = os.Getenv("MYSQL_USER")
-	mySQLPassword = os.Getenv("MYSQL_PASSWORD")
+	dbUser     = os.Getenv("MYSQL_USER")
+	dbPassword = os.Getenv("MYSQL_PASSWORD")
 )
 
 func run() error {
-	if len(mySQLUser) == 0 {
-		return errors.New("MYSQL_USER not set")
-	}
-	if len(mySQLPassword) == 0 {
-		return errors.New("MYSQL_PASSWORD not set")
+	if len(dbUser) == 0 {
+		dbUser = "root"
 	}
 
-	var conf = mysql.Conf{
-		Address:  *flgMySQLAddr,
-		Port:     *flgMySQLPort,
-		User:     os.Getenv("MYSQL_USER"),
-		Password: os.Getenv("MYSQL_PASSWORD"),
-		Database: *flgMySQLDatabase,
-	}
-
-	if val := os.Getenv("MYSQL_USER"); len(val) > 0 {
-		conf.User = val
-	}
-	if val := os.Getenv("MYSQL_PASSWORD"); len(val) > 0 {
-		conf.Password = val
-	}
-
-	d, err := mysql.New(conf)
+	src := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		dbUser, dbPassword, *flgMySQLAddr, *flgMySQLPort, *flgMySQLDatabase)
+	db, err := sql.Open("mysql", src)
 	if err != nil {
 		return err
 	}
 
+	d := mysql.New(db)
 	h := web.New(d)
 
 	log.Printf("server started, http=%s, mysql-addr=%s, mysql-port=%d, mysql-database=%s",
-		*flgHTTP, conf.Address, conf.Port, conf.Database)
+		*flgHTTP, *flgMySQLAddr, *flgMySQLPort, *flgMySQLDatabase)
 
 	http.Handle("/", h)
 	return http.ListenAndServe(":8080", nil)
