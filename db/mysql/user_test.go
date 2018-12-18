@@ -11,7 +11,7 @@ import (
 func TestAddUser(t *testing.T) {
 	ctx := context.Background()
 
-	sql, err := newDB()
+	sql, err := initDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestAddUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	ctx := context.Background()
 
-	sql, err := newDB()
+	sql, err := initDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestGetUser(t *testing.T) {
 func TestListUser(t *testing.T) {
 	ctx := context.Background()
 
-	sql, err := newDB()
+	sql, err := initDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func TestListUser(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 	ctx := context.Background()
 
-	sql, err := newDB()
+	sql, err := initDB()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +151,7 @@ func TestUpdateUser(t *testing.T) {
 func TestRemoveUser(t *testing.T) {
 	ctx := context.Background()
 
-	sql, err := newDB()
+	sql, err := initDB()
 	if err != nil {
 		t.Fatal(err)
 	}

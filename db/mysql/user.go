@@ -8,7 +8,7 @@ import (
 )
 
 func (i *impl) AddUser(ctx context.Context, u core.User) error {
-	_, err := i.db.Exec(`INSERT INTO user(login, name, created_at, updated_at) VALUES (?, ?, NOW(), NOW())`, u.Login, u.Name)
+	_, err := i.db.Exec(`INSERT INTO user(login, name) VALUES (?, ?)`, u.Login, u.Name)
 	if isConflict(err) {
 		return db.ErrConflict
 	}

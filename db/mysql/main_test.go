@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"testing"
 )
 
 func newDB() (*sql.DB, error) {
@@ -41,21 +40,15 @@ func newDB() (*sql.DB, error) {
 	return sql.Open("mysql", src)
 }
 
-func initDB() error {
+func initDB() (*sql.DB, error) {
 	db, err := newDB()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = db.Exec(`TRUNCATE user`)
-	return err
-}
-
-func TestMain(m *testing.M) {
-	err := initDB()
+	_, err = db.Exec(`DELETE FROM user_photo`)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		return nil, err
 	}
-
-	os.Exit(m.Run())
+	_, err = db.Exec(`DELETE FROM user`)
+	return db, err
 }
