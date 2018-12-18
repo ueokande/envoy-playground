@@ -9,14 +9,16 @@ import (
 
 func New() db.Interface {
 	return &impl{
-		users: make(map[string]core.User),
+		users:      make(map[string]core.User),
+		userPhotos: make(map[string]string),
 	}
 }
 
 type impl struct {
 	m sync.Mutex
 
-	users map[string]core.User
+	users      map[string]core.User
+	userPhotos map[string]string
 }
 
 func (i *impl) Close() error {

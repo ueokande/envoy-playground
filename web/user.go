@@ -3,8 +3,8 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
+	"github.com/gorilla/mux"
 	core "github.com/ueokande/envoy-playground"
 	"github.com/ueokande/envoy-playground/db"
 )
@@ -23,7 +23,7 @@ func (i *impl) handleUserIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *impl) handleUserGet(w http.ResponseWriter, r *http.Request) {
-	login := strings.TrimPrefix(r.URL.Path, "/user/")
+	login := mux.Vars(r)["login"]
 	u, err := i.db.GetUser(r.Context(), login)
 	if err == db.ErrNotFound {
 		i.renderMessage(w, 404, "user not found: "+login)
@@ -63,7 +63,7 @@ func (i *impl) handleUserAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *impl) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
-	login := strings.TrimPrefix(r.URL.Path, "/user/")
+	login := mux.Vars(r)["login"]
 
 	var u core.User
 	err := json.NewDecoder(r.Body).Decode(&u)
@@ -97,7 +97,7 @@ func (i *impl) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *impl) handleUserDelete(w http.ResponseWriter, r *http.Request) {
-	login := strings.TrimPrefix(r.URL.Path, "/user/")
+	login := mux.Vars(r)["login"]
 	err := i.db.RemoveUser(r.Context(), login)
 	if err == db.ErrNotFound {
 		i.renderMessage(w, 404, "use not found: "+login)

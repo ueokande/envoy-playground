@@ -3,34 +3,33 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/ueokande/envoy-playground/db"
 )
 
 func New(db db.Interface) http.Handler {
-	return &impl{db: db}
+	r := mux.NewRouter()
+	i := &impl{r: r, db: db}
+	i.init()
+	return i
 }
 
 type impl struct {
+	r  *mux.Router
 	db db.Interface
 }
 
+func (i *impl) init() {
+	i.r.HandleFunc("/users", i.handleUserIndex).Methods("GET")
+	i.r.HandleFunc("/user/{login}", i.handleUserGet).Methods("GET")
+	i.r.HandleFunc("/users", i.handleUserAdd).Methods("POST")
+	i.r.HandleFunc("/user/{login}", i.handleUserUpdate).Methods("PUT")
+	i.r.HandleFunc("/user/{login}", i.handleUserDelete).Methods("DELETE")
+}
+
 func (i *impl) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch {
-	case r.Method == http.MethodGet && r.URL.Path == "/users":
-		i.handleUserIndex(w, r)
-	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/user/"):
-		i.handleUserGet(w, r)
-	case r.Method == http.MethodPost && r.URL.Path == "/users":
-		i.handleUserAdd(w, r)
-	case r.Method == http.MethodPut && strings.HasPrefix(r.URL.Path, "/user/"):
-		i.handleUserUpdate(w, r)
-	case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/user/"):
-		i.handleUserDelete(w, r)
-	default:
-		i.renderMessage(w, 404, "path not found")
-	}
+	i.r.ServeHTTP(w, r)
 }
 
 func (i *impl) renderJson(w http.ResponseWriter, data interface{}) {
