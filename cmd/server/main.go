@@ -26,10 +26,10 @@ var (
 	dbPassword = os.Getenv("MYSQL_PASSWORD")
 	dbPort     int
 
-	blobEndpoint  = os.Getenv("BLOB_ENDPOINT")
-	blobAccessKey = os.Getenv("BLOB_ACCESS_KEY")
-	blobSecretKey = os.Getenv("BLOB_SECRET_KEY")
-	blobBucket    = os.Getenv("BLOB_BUCKET")
+	minioEndpoint  = os.Getenv("MINIO_ENDPOINT")
+	minioAccessKey = os.Getenv("MINIO_ACCESS_KEY")
+	minioSecretKey = os.Getenv("MINIO_SECRET_KEY")
+	minioBucket    = os.Getenv("MINIO_BUCKET")
 )
 
 func validate() error {
@@ -50,17 +50,17 @@ func validate() error {
 	if len(dbPassword) == 0 {
 		return errors.New("MYSQL_PASSWORD not set")
 	}
-	if len(blobEndpoint) == 0 {
-		return errors.New("BLOB_ENDPOINT not set")
+	if len(minioEndpoint) == 0 {
+		return errors.New("MINIO_ENDPOINT not set")
 	}
-	if len(blobAccessKey) == 0 {
-		return errors.New("BLOB_ACCESS_KEY not set")
+	if len(minioAccessKey) == 0 {
+		return errors.New("MINIO_ACCESS_KEY not set")
 	}
-	if len(blobSecretKey) == 0 {
-		return errors.New("BLOB_SECRET_KEY not set")
+	if len(minioSecretKey) == 0 {
+		return errors.New("MINIO_SECRET_KEY not set")
 	}
-	if len(blobBucket) == 0 {
-		return errors.New("BLOB_BUCKET not set")
+	if len(minioBucket) == 0 {
+		return errors.New("MINIO_BUCKET not set")
 	}
 	return nil
 }
@@ -80,23 +80,23 @@ func run() error {
 
 	d := mysql.New(db)
 	b, err := minio.New(minio.Conf{
-		Endpoint:  blobEndpoint,
-		AccessKey: blobAccessKey,
-		SecretKey: blobSecretKey,
+		Endpoint:  minioEndpoint,
+		AccessKey: minioAccessKey,
+		SecretKey: minioSecretKey,
 		UseSSL:    false,
-	}, blobBucket)
+	}, minioBucket)
 	if err != nil {
 		return err
 	}
 	h := web.New(d, b)
 
 	log.Info("starting server", map[string]interface{}{
-		"http":          *flgHTTP,
-		"mysql_addr":    dbAddr,
-		"mysql_port":    dbPort,
-		"mysql_name":    dbName,
-		"blob_endpoint": blobEndpoint,
-		"blob_bucket":   blobBucket,
+		"http":           *flgHTTP,
+		"mysql_addr":     dbAddr,
+		"mysql_port":     dbPort,
+		"mysql_name":     dbName,
+		"minio_endpoint": minioEndpoint,
+		"minio_bucket":   minioBucket,
 	})
 
 	logger := log.NewLogger()
