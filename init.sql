@@ -11,7 +11,7 @@ CREATE TABLE user (
 
 CREATE TABLE user_photo (
   `user_id` bigint(100) NOT NULL UNIQUE,
-  `uuid` varchar(32) NOT NULL,
+  `uuid` varchar(36) NOT NULL,
 
   CONSTRAINT fk_user_id
     FOREIGN KEY (user_id)
