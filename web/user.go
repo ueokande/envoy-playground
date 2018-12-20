@@ -50,6 +50,7 @@ func (i *impl) handleUserAdd(w http.ResponseWriter, r *http.Request) {
 	err = i.db.AddUser(r.Context(), u)
 	if err == db.ErrConflict {
 		i.renderMessage(w, 409, "user already exists: "+u.Login)
+		return
 	} else if err != nil {
 		i.renderMessage(w, 500, err.Error())
 		return
