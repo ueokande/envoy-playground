@@ -21,7 +21,7 @@ var (
 
 	dbAddr     = os.Getenv("MYSQL_ADDR")
 	dbPortStr  = os.Getenv("MYSQL_PORT")
-	dbName     = os.Getenv("MYSQL_NAME")
+	dbName     = os.Getenv("MYSQL_DATABASE")
 	dbUser     = os.Getenv("MYSQL_USER")
 	dbPassword = os.Getenv("MYSQL_PASSWORD")
 	dbPort     int
@@ -42,7 +42,7 @@ func validate() error {
 		return errors.New("parsing MYSQL_PORT: " + err.Error())
 	}
 	if len(dbName) == 0 {
-		return errors.New("MYSQL_NAME not set")
+		return errors.New("MYSQL_DATABASE not set")
 	}
 	if len(dbUser) == 0 {
 		return errors.New("MYSQL_USER not set")
@@ -108,7 +108,6 @@ func run() error {
 		},
 		AccessLog: logger,
 	}
-
 	err = serv.ListenAndServe()
 	if err != nil {
 		return err
