@@ -98,8 +98,27 @@ func (i *impl) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *impl) handleUserDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	login := mux.Vars(r)["login"]
-	err := i.db.RemoveUser(r.Context(), login)
+
+	uuid, err := i.db.GetPhoto(ctx, login)
+	if err == db.ErrNotFound {
+	} else if err != nil {
+		i.renderMessage(w, 500, err.Error())
+		return
+	} else {
+		err = i.db.RemovePhoto(ctx, login)
+		if err != nil {
+			i.renderMessage(w, 500, err.Error())
+			return
+		}
+		err = i.blob.Delete(ctx, uuid)
+		if err != nil {
+			i.renderMessage(w, 500, err.Error())
+			return
+		}
+	}
+	err = i.db.RemoveUser(r.Context(), login)
 	if err == db.ErrNotFound {
 		i.renderMessage(w, 404, "use not found: "+login)
 		return

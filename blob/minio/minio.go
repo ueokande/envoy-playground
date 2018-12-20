@@ -47,8 +47,8 @@ func (i *impl) Get(ctx context.Context, name string) (blob.Object, error) {
 	return o, nil
 }
 
-func (i *impl) Put(ctx context.Context, name string, r io.Reader, size int64) error {
-	_, err := i.c.PutObjectWithContext(ctx, i.bucket, name, r, size, minio.PutObjectOptions{})
+func (i *impl) Put(ctx context.Context, name string, r io.Reader) error {
+	_, err := i.c.PutObjectWithContext(ctx, i.bucket, name, r, -1, minio.PutObjectOptions{})
 	return err
 }
 

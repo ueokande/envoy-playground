@@ -16,7 +16,7 @@ type Object interface {
 type Interface interface {
 	Get(ctx context.Context, name string) (Object, error)
 
-	Put(ctx context.Context, name string, r io.Reader, size int64) error
+	Put(ctx context.Context, name string, r io.Reader) error
 
 	Delete(ctx context.Context, name string) error
 }

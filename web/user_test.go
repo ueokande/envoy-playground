@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"sort"
+	"strings"
 	"testing"
 
 	core "github.com/ueokande/envoy-playground"
+	"github.com/ueokande/envoy-playground/blob"
 	mockBlob "github.com/ueokande/envoy-playground/blob/mock"
 	"github.com/ueokande/envoy-playground/db"
 	mockDB "github.com/ueokande/envoy-playground/db/mock"
@@ -48,7 +50,8 @@ func TestUserGet(t *testing.T) {
 	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
 	h := New(d, mockBlob.New())
 
-	r := httptest.NewRequest("GET", "/user/alice", nil)
+	r := httptest.NewRequest("GET", "/user/alice", nil).
+		WithContext(context.WithValue(ctx, "login", "alice"))
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -66,7 +69,8 @@ func TestUserGet(t *testing.T) {
 		t.Error("unexpected user: ", u)
 	}
 
-	r = httptest.NewRequest("GET", "/user/ghost", nil)
+	r = httptest.NewRequest("GET", "/user/ghost", nil).
+		WithContext(context.WithValue(ctx, "login", "ghost"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -127,7 +131,8 @@ func TestUserUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := httptest.NewRequest("PUT", "/user/alice", b)
+	r := httptest.NewRequest("PUT", "/user/alice", b).
+		WithContext(context.WithValue(ctx, "login", "alice"))
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -148,7 +153,8 @@ func TestUserUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r = httptest.NewRequest("PUT", "/user/bob", b)
+	r = httptest.NewRequest("PUT", "/user/bob", b).
+		WithContext(context.WithValue(ctx, "login", "bob"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -161,7 +167,8 @@ func TestUserUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r = httptest.NewRequest("PUT", "/user/ghost", b)
+	r = httptest.NewRequest("PUT", "/user/ghost", b).
+		WithContext(context.WithValue(ctx, "login", "ghost"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -173,10 +180,16 @@ func TestUserUpdate(t *testing.T) {
 func TestUserDelete(t *testing.T) {
 	ctx := context.Background()
 	d := mockDB.New()
-	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
-	h := New(d, mockBlob.New())
+	b := mockBlob.New()
+	h := New(d, b)
 
-	r := httptest.NewRequest("DELETE", "/user/alice", nil)
+	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
+	d.UpdatePhoto(ctx, "alice", "0000-0000")
+	d.AddUser(ctx, core.User{Login: "bob", Name: "Bob"})
+	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"))
+
+	r := httptest.NewRequest("DELETE", "/user/alice", nil).
+		WithContext(context.WithValue(ctx, "login", "alice"))
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 
@@ -188,8 +201,26 @@ func TestUserDelete(t *testing.T) {
 	if err != db.ErrNotFound {
 		t.Fatal(err)
 	}
+	_, err = d.GetPhoto(ctx, "alice")
+	if err != db.ErrNotFound {
+		t.Fatal(err)
+	}
+	_, err = b.Get(ctx, "0000-0000")
+	if err != blob.ErrNotFound {
+		t.Fatal(err)
+	}
 
-	r = httptest.NewRequest("DELETE", "/user/alice", nil)
+	r = httptest.NewRequest("DELETE", "/user/bob", nil).
+		WithContext(context.WithValue(ctx, "login", "bob"))
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+
+	if w.Code != 200 {
+		t.Fatal(`w.Result().StatusCode != 200: `, w.Code)
+	}
+
+	r = httptest.NewRequest("DELETE", "/user/alice", nil).
+		WithContext(context.WithValue(ctx, "login", "bob"))
 	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 

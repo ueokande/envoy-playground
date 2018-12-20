@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"io/ioutil"
 
 	"github.com/ueokande/envoy-playground/blob"
 )
@@ -24,9 +25,8 @@ func (i *impl) Get(ctx context.Context, name string) (blob.Object, error) {
 	return &object{bytes.NewReader(b)}, nil
 }
 
-func (i *impl) Put(ctx context.Context, name string, r io.Reader, size int64) error {
-	buf := make([]byte, size)
-	_, err := r.Read(buf)
+func (i *impl) Put(ctx context.Context, name string, r io.Reader) error {
+	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}

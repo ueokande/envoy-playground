@@ -23,7 +23,7 @@ func TestUserPhotoGet(t *testing.T) {
 	d.UpdatePhoto(ctx, "alice", "0000-0000")
 
 	b := mockBlob.New()
-	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"), 12)
+	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"))
 
 	h := New(d, b)
 	r := httptest.NewRequest("GET", "/user/alice/photo", nil).
@@ -66,7 +66,7 @@ func TestUserPhotoPut(t *testing.T) {
 	d.UpdatePhoto(ctx, "alice", "0000-0000")
 
 	b := mockBlob.New()
-	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"), 9)
+	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"))
 
 	h := New(d, b)
 	r := httptest.NewRequest("PUT", "/user/alice/photo", strings.NewReader("raw:yyyyyyyy")).
@@ -118,7 +118,7 @@ func TestUserPhotoDelete(t *testing.T) {
 	d.UpdatePhoto(ctx, "alice", "0000-0000")
 
 	b := mockBlob.New()
-	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"), 9)
+	b.Put(ctx, "0000-0000", strings.NewReader("raw:xxxxxxxx"))
 
 	h := New(d, b)
 	r := httptest.NewRequest("DELETE", "/user/alice/photo", nil).

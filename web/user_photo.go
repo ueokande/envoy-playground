@@ -57,7 +57,7 @@ func (i *impl) handleUserPhotoPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := blob.NewID()
-	err = i.blob.Put(ctx, id, r.Body, r.ContentLength)
+	err = i.blob.Put(ctx, id, r.Body)
 	if err != nil {
 		i.renderMessage(w, 500, err.Error())
 		return

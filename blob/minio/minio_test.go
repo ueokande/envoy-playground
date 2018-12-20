@@ -20,7 +20,7 @@ func TestGet(t *testing.T) {
 
 	bucket := strings.ToLower(t.Name())
 	src := "hello-wonderland"
-	_, err = m.PutObject(bucket, "first", strings.NewReader(src), int64(len(src)), minio.PutObjectOptions{})
+	_, err = m.PutObject(bucket, "first", strings.NewReader(src), -1, minio.PutObjectOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestPut(t *testing.T) {
 	c := impl{c: m, bucket: bucket}
 
 	for name, blob := range map[string]string{"first": "alice", "second": "bob"} {
-		err := c.Put(ctx, name, strings.NewReader(blob), int64(len(blob)))
+		err := c.Put(ctx, name, strings.NewReader(blob))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -103,7 +103,7 @@ func TestDelete(t *testing.T) {
 
 	bucket := strings.ToLower(t.Name())
 	src := "hello-wonderland"
-	_, err = m.PutObject(bucket, "first", strings.NewReader(src), int64(len(src)), minio.PutObjectOptions{})
+	_, err = m.PutObject(bucket, "first", strings.NewReader(src), -1, minio.PutObjectOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
