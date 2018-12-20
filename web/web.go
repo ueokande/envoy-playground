@@ -5,19 +5,21 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/ueokande/envoy-playground/blob"
 	"github.com/ueokande/envoy-playground/db"
 )
 
-func New(db db.Interface) http.Handler {
+func New(db db.Interface, blob blob.Interface) http.Handler {
 	r := mux.NewRouter()
-	i := &impl{r: r, db: db}
+	i := &impl{r: r, db: db, blob: blob}
 	i.init()
 	return i
 }
 
 type impl struct {
-	r  *mux.Router
-	db db.Interface
+	r    *mux.Router
+	db   db.Interface
+	blob blob.Interface
 }
 
 func (i *impl) init() {
@@ -26,6 +28,10 @@ func (i *impl) init() {
 	i.r.HandleFunc("/users", i.handleUserAdd).Methods("POST")
 	i.r.HandleFunc("/user/{login}", i.handleUserUpdate).Methods("PUT")
 	i.r.HandleFunc("/user/{login}", i.handleUserDelete).Methods("DELETE")
+
+	i.r.HandleFunc("/user/{login}/photo", i.handleUserPhotoGet).Methods("GET")
+	i.r.HandleFunc("/user/{login}/photo", i.handleUserPhotoPut).Methods("PUT")
+	i.r.HandleFunc("/user/{login}/photo", i.handleUserPhotoDelete).Methods("DELETE")
 }
 
 func (i *impl) ServeHTTP(w http.ResponseWriter, r *http.Request) {

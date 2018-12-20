@@ -9,16 +9,18 @@ import (
 	"testing"
 
 	core "github.com/ueokande/envoy-playground"
+	mockBlob "github.com/ueokande/envoy-playground/blob/mock"
 	"github.com/ueokande/envoy-playground/db"
-	"github.com/ueokande/envoy-playground/db/mock"
+	mockDB "github.com/ueokande/envoy-playground/db/mock"
 )
 
 func TestUserIndex(t *testing.T) {
 	ctx := context.Background()
-	d := mock.New()
+	d := mockDB.New()
 	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
 	d.AddUser(ctx, core.User{Login: "bob", Name: "Bob"})
-	h := New(d)
+
+	h := New(d, mockBlob.New())
 
 	r := httptest.NewRequest("GET", "/users", nil)
 	w := httptest.NewRecorder()
@@ -42,9 +44,9 @@ func TestUserIndex(t *testing.T) {
 
 func TestUserGet(t *testing.T) {
 	ctx := context.Background()
-	d := mock.New()
+	d := mockDB.New()
 	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
-	h := New(d)
+	h := New(d, mockBlob.New())
 
 	r := httptest.NewRequest("GET", "/user/alice", nil)
 	w := httptest.NewRecorder()
@@ -76,8 +78,8 @@ func TestUserGet(t *testing.T) {
 func TestUserAdd(t *testing.T) {
 	ctx := context.Background()
 
-	d := mock.New()
-	h := New(d)
+	d := mockDB.New()
+	h := New(d, mockBlob.New())
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(core.User{Login: "alice", Name: "Alice"})
@@ -115,9 +117,9 @@ func TestUserAdd(t *testing.T) {
 
 func TestUserUpdate(t *testing.T) {
 	ctx := context.Background()
-	d := mock.New()
+	d := mockDB.New()
 	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
-	h := New(d)
+	h := New(d, mockBlob.New())
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(core.User{Login: "alice", Name: "Alice 2nd"})
@@ -170,9 +172,9 @@ func TestUserUpdate(t *testing.T) {
 
 func TestUserDelete(t *testing.T) {
 	ctx := context.Background()
-	d := mock.New()
+	d := mockDB.New()
 	d.AddUser(ctx, core.User{Login: "alice", Name: "Alice"})
-	h := New(d)
+	h := New(d, mockBlob.New())
 
 	r := httptest.NewRequest("DELETE", "/user/alice", nil)
 	w := httptest.NewRecorder()
