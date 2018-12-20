@@ -1,6 +1,8 @@
 module github.com/ueokande/envoy-playground
 
 require (
+	github.com/cybozu-go/log v1.5.0
+	github.com/cybozu-go/well v1.8.1
 	github.com/go-ini/ini v1.39.3 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
