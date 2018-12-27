@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var loginRegex = regexp.MustCompile(`^[a-z_]{5}[a-z_]*$`)
+var loginRegex = regexp.MustCompile(`^[a-z0-9_]{2}[a-z0-9_]*$`)
 var nameRegex = regexp.MustCompile(`^\P{C}+$`)
 
 type User struct {

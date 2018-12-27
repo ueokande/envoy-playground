@@ -100,6 +100,7 @@ func run() error {
 	})
 
 	logger := log.NewLogger()
+	logger.SetThreshold(log.LvError)
 
 	serv := &well.HTTPServer{
 		Server: &http.Server{
